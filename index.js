@@ -29,11 +29,24 @@ db.connect(err => {
 // POST /input
 app.post("/input", (req, res) => {
     const { fullname, email } = req.body;
-    if (!fullname || !email) return res.status(400).json({ error: "fullname and email required" });
+    console.log("Received POST /input:", req.body);
+    console.log(fullname,email);
+
+    if (!fullname || !email) {
+        console.warn("Missing fullname or email");
+        return res.status(400).json({ error: "fullname and email required" });
+    }
 
     const sql = "INSERT INTO users (fullname, email) VALUES (?, ?)";
     db.query(sql, [fullname, email], (err, result) => {
-        if (err) return res.status(500).json({ error: "Database error" });
+        if (err) {
+            console.error("Insert error:", err); // log full error
+            if (err.code === "ER_DUP_ENTRY") {
+                return res.status(400).json({ error: "Email already exists" });
+            }
+            return res.status(500).json({ error: err.message });
+        }
+        console.log("Insert successful, ID:", result.insertId);
         res.json({ message: "User added successfully", id: result.insertId });
     });
 });
@@ -41,11 +54,20 @@ app.post("/input", (req, res) => {
 // GET /verify
 app.get("/verify", (req, res) => {
     const email = req.query.email;
-    if (!email) return res.status(400).json({ error: "email required" });
+    console.log("Received GET /verify for email:", email);
+
+    if (!email) {
+        console.warn("Missing email in query");
+        return res.status(400).json({ error: "email required" });
+    }
 
     const sql = "SELECT * FROM users WHERE email = ?";
     db.query(sql, [email], (err, results) => {
-        if (err) return res.status(500).json({ error: "Database error" });
+        if (err) {
+            console.error("Select error:", err); // log full error
+            return res.status(500).json({ error: err.message });
+        }
+        console.log("Select results:", results);
         if (results.length > 0) res.json({ verified: true, data: results[0] });
         else res.json({ verified: false });
     });
