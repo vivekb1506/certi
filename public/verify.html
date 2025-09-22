@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Certificate Verification</title>
+
+  <!-- Google Fonts (optional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1320;
+      --muted:#9aa7bf;
+      --accent:#6ee7b7;
+      --accent-2:#60a5fa;
+      --danger:#ff7b7b;
+      --glass: rgba(255,255,255,0.03);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(96,165,250,0.07), transparent 10%),
+        radial-gradient(700px 350px at 90% 90%, rgba(110,231,183,0.04), transparent 10%),
+        var(--bg);
+      color:#e6eef8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:820px;
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      padding:28px;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:22px;
+      align-items:start;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    @media (max-width:880px){
+      .wrap{grid-template-columns: 1fr; padding:20px}
+    }
+
+    .left{
+      padding:18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;margin-bottom:10px;
+    }
+    .logo{
+      width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#08203a;
+      box-shadow: 0 6px 18px rgba(38,70,84,0.2);
+    }
+    h1{margin:0;font-size:20px}
+    p.lead{color:var(--muted);margin-top:8px;font-size:14px;line-height:1.4}
+
+    .card{
+      margin-top:18px;
+      background:var(--card);
+      padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+    }
+
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+    .input-row{display:flex;gap:10px;align-items:center}
+    input[type="email"]{
+      flex:1;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
+      background:transparent;color:inherit;font-size:15px;outline:none;
+      transition:box-shadow .12s, transform .12s;
+    }
+    input[type="email"]:focus{box-shadow:0 6px 18px rgba(96,165,250,0.08); transform:translateY(-1px)}
+
+    button.primary{
+      border:0;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#06202e;font-weight:600;cursor:pointer;font-size:14px;
+      box-shadow: 0 8px 20px rgba(96,165,250,0.08);
+    }
+    button.ghost{
+      background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:9px 12px;border-radius:10px;cursor:pointer;
+    }
+
+    .result{
+      margin-top:16px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border:1px solid rgba(255,255,255,0.02);min-height:72px;display:flex;align-items:center;gap:12px;
+    }
+    .verified{
+      display:flex;flex-direction:column;
+    }
+    .status{
+      font-weight:700;font-size:16px;
+    }
+    .status.ok{color:var(--accent)}
+    .status.no{color:var(--danger)}
+
+    .small{font-size:13px;color:var(--muted)}
+    .meta{margin-top:8px;font-size:13px;color:var(--muted)}
+
+    /* right panel */
+    .right{
+      padding:18px;background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border-radius:12px; border:1px solid rgba(255,255,255,0.02);
+      display:flex;flex-direction:column;gap:12px;
+      align-items:stretch;
+    }
+
+    .hint{font-size:13px;color:var(--muted);line-height:1.5}
+    .kbd{display:inline-block;background:rgba(0,0,0,0.14);padding:6px 8px;border-radius:6px;font-weight:600;font-size:13px}
+
+    .spinner{
+      width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,0.06);border-top-color:var(--accent-2);
+      animation:spin 0.9s linear infinite; display:inline-block;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .copyBtn{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px}
+
+    footer{margin-top:6px;font-size:12px;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+
+  <main class="wrap" role="main" aria-labelledby="title">
+    <section class="left" aria-labelledby="title">
+      <div class="brand">
+        <div class="logo">CV</div>
+        <div>
+          <h1 id="title">Certificate Verification</h1>
+          <p class="lead">Enter an email to verify whether a certificate (or record) exists. Fast, secure check — no login required.</p>
+        </div>
+      </div>
+
+      <div class="card" aria-live="polite">
+        <form id="verifyForm" autocomplete="off" novalidate>
+          <label for="email">Email address</label>
+          <div class="input-row">
+            <input id="email" name="email" type="email" placeholder="example@domain.com" required aria-required="true" />
+            <button type="submit" class="primary" id="verifyBtn">Verify</button>
+          </div>
+
+          <div id="result" class="result" style="display:none">
+            <div id="resultBody" class="verified" role="status"></div>
+          </div>
+
+        </form>
+      </div>
+
+      <footer>
+        <small>Powered by your server — results check the <span class="kbd">users</span> table.</small>
+      </footer>
+    </section>
+
+    <aside class="right" aria-label="help">
+      <h3 style="margin:0 0 6px 0">Quick tips</h3>
+      <p class="hint">Type a valid email and press <strong>Verify</strong>. The page calls <code>/verify?email=...</code> on your server and shows the verification status immediately.</p>
+
+      <div style="display:flex;gap:8px">
+        <button class="ghost" id="example1">Try sample</button>
+        <button class="ghost" id="clear">Clear</button>
+      </div>
+
+      <div class="meta small">
+        <div><strong>Endpoint:</strong> <code>/verify?email=&lt;email&gt;</code></div>
+        <div style="margin-top:8px"><strong>Response:</strong> JSON with <code>verified:true|false</code> and optional <code>data</code>.</div>
+      </div>
+    </aside>
+  </main>
+
+<script>
+(function(){
+  const form = document.getElementById('verifyForm');
+  const emailInput = document.getElementById('email');
+  const result = document.getElementById('result');
+  const resultBody = document.getElementById('resultBody');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const exampleBtn = document.getElementById('example1');
+  const clearBtn = document.getElementById('clear');
+
+  function showLoading(on){
+    verifyBtn.disabled = on;
+    verifyBtn.innerHTML = on ? '<span class="spinner" aria-hidden="true"></span>' : 'Verify';
+  }
+
+  function renderResponse(json, email){
+    result.style.display = 'flex';
+    if(json && json.verified){
+      resultBody.innerHTML = `
+        <div class="status ok">Verified ✓</div>
+        <div class="small meta">Email: <strong>${escapeHtml(email)}</strong></div>
+        <div class="small" style="margin-top:8px">Name: <strong>${escapeHtml(json.data && json.data.fullname ? json.data.fullname : '—')}</strong></div>
+        <div style="margin-top:10px">
+          <button class="copyBtn" onclick="navigator.clipboard?.writeText('${escapeHtml(email)}') ? this.textContent='Copied' : null">Copy email</button>
+        </div>
+      `;
+    } else {
+      resultBody.innerHTML = `
+        <div class="status no">Not found ✕</div>
+        <div class="small meta" style="margin-top:8px">No certificate or record found for <strong>${escapeHtml(email)}</strong></div>
+      `;
+    }
+  }
+
+  function renderError(msg){
+    result.style.display = 'flex';
+    resultBody.innerHTML = `
+      <div class="status no">Error</div>
+      <div class="small meta" style="margin-top:8px">${escapeHtml(msg)}</div>
+    `;
+  }
+
+  function escapeHtml(s){
+    if(!s) return '';
+    return String(s)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const email = (emailInput.value || '').trim();
+    if(!email){
+      renderError('Please enter an email address.');
+      return;
+    }
+
+    showLoading(true);
+    try {
+      const resp = await fetch('/verify?email=' + encodeURIComponent(email), { method:'GET', cache:'no-store' });
+      if(!resp.ok){
+        const text = await resp.text();
+        renderError(resp.status + ' ' + (text || resp.statusText));
+        showLoading(false);
+        return;
+      }
+      const json = await resp.json();
+      renderResponse(json, email);
+    } catch(err){
+      renderError('Network error — make sure the server is running.');
+    } finally {
+      showLoading(false);
+    }
+  });
+
+  exampleBtn.addEventListener('click', () => {
+    emailInput.value = 'roopesh408719@gmail.com';
+    emailInput.focus();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    emailInput.value = '';
+    result.style.display = 'none';
+    resultBody.innerHTML = '';
+    emailInput.focus();
+  });
+
+  // accessibility: submit on Enter
+  emailInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ form.requestSubmit(); }});
+})();
+</script>
+
+</body>
+</html>
